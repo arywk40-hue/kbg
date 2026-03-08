@@ -1,0 +1,26 @@
+# ── Model checkpoints (too large for GitHub) ──
+checkpoints/*.pth
+checkpoints/*.pt
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── IDE ──
+.vscode/
+.idea/
+
+# ── Data (not part of the repo) ──
+data/
+
+# ── Misc ──
+*.log
+*.csv.bak

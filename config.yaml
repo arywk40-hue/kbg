@@ -1,0 +1,112 @@
+# ============================================================
+# Bone Fracture Classification - Configuration
+# Kamand Bioengineering Group Hackathon 2025
+# ============================================================
+
+data:
+  # After running clean_resplit.py, point to the deduped leak-free splits.
+  # Original (raw) paths kept as comments for reference.
+  # data_dir: "../../data/Bone_Fracture_Binary_Classification"
+  # train_dir: "../../data/Bone_Fracture_Binary_Classification/train"
+  # val_dir:   "../../data/Bone_Fracture_Binary_Classification/val"
+  # test_dir:  "../../data/Bone_Fracture_Binary_Classification/test"
+  data_dir: "../../data/clean_split"
+  train_dir: "../../data/clean_split/train"
+  val_dir:   "../../data/clean_split/val"
+  test_dir:  "../../data/clean_split/test"
+  img_size: 224          # resize all images to 224×224 (ViT standard)
+  num_workers: 4
+  pin_memory: true
+
+  # Classes are auto-detected from directory names at runtime.
+  # Listed here for reference only (sorted alphabetically = label order).
+  classes:
+    - "fractured"
+    - "not fractured"
+
+augmentation:
+  train:
+    random_horizontal_flip: true
+    random_vertical_flip: false
+    random_rotation: 15          # degrees
+    color_jitter:
+      brightness: 0.2
+      contrast: 0.2
+    random_affine:
+      degrees: 10
+      translate: [0.05, 0.05]
+      scale: [0.9, 1.1]
+    gaussian_blur_prob: 0.1
+    random_erasing_prob: 0.1
+    mixup_alpha: 0.2             # set 0.0 to disable
+    cutmix_alpha: 1.0            # set 0.0 to disable
+  normalize:
+    mean: [0.485, 0.456, 0.406]  # ImageNet statistics
+    std:  [0.229, 0.224, 0.225]
+
+model:
+  architecture: "vit_small_patch16_224"   # timm model name (fallback if ensemble disabled)
+  pretrained: true                        # ImageNet pretrained weights
+  dropout: 0.1
+  attention_dropout: 0.0
+  # Ensemble settings
+  ensemble:
+    enabled: true
+    models:
+      - "vit_small_patch16_224"
+      - "efficientnet_b0"
+      - "convnext_tiny"
+    weights: [0.5, 0.25, 0.25]   # soft voting weights
+
+training:
+  seed: 42
+  epochs: 20
+  batch_size: 16
+  accumulation_steps: 4          # effective batch = 64
+
+  optimizer:
+    name: "adamw"
+    lr: 1.0e-4
+    weight_decay: 1.0e-2
+    betas: [0.9, 0.999]
+
+  scheduler:
+    name: "cosine_with_warmup"
+    warmup_epochs: 3
+    min_lr: 1.0e-6
+
+  loss:
+    name: "label_smoothing_cross_entropy"
+    smoothing: 0.1
+
+  early_stopping:
+    enabled: true
+    patience: 7
+    monitor: "val_f1"
+    mode: "max"
+
+  mixed_precision: true           # fp16 training
+  gradient_clip: 1.0
+
+  cross_validation:
+    enabled: true
+    folds: 5
+    stratified: true
+
+evaluation:
+  metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1"
+    - "auc_roc"
+    - "confusion_matrix"
+  threshold: 0.5
+
+output:
+  checkpoint_dir: "checkpoints"
+  results_dir:    "results"
+  log_dir:        "logs"
+  save_best_only: true
+  final_results_csv:   "results/final_results.csv"
+  performance_csv:     "results/model_performance_analysis.csv"

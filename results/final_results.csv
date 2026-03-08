@@ -1,0 +1,13 @@
+metric_name,overall_value,class_1_value (fractured),class_2_value (not fractured),interpretation
+Accuracy,0.9807,0.9807,0.9807,Overall correctness
+Precision,0.9784,0.9635,0.9933,Positive prediction reliability
+Recall,0.9822,0.9906,0.9737,Detection rate per fracture type
+F1-Score,0.9802,0.9769,0.9834,Balanced performance per class
+AUC-ROC,0.9991,0.9991,0.9991,Threshold-independent discriminability
+Macro F1-Score,0.9802,,,Primary ranking metric
+AUC-ROC (macro),0.9991,,,Secondary ranking metric
+Inference Time (ms/img),374.34,,,Tiebreaker - lower is better
+Model Size (MB),643.0,,,Tiebreaker - smaller is better
+Training Time (min),0.0,,,Informational
+CV Mean F1 (5-fold),0.0000,,,Cross-validation generalization
+CV Std F1 (5-fold),0.0000,,,Cross-validation stability

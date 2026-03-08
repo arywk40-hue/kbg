@@ -1,0 +1,8 @@
+Team Name   : BoneVision
+Institution : IIT Mandi
+Members     :
+  1. Palak Mittal
+  2. Ariyan Bhakat
+  3. Aryan Raj
+Hackathon   : KBG Hackathon 2025 – Bone Fracture Classification
+Contact     : IIT Mandi, Himachal Pradesh, India
