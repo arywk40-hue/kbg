@@ -39,10 +39,47 @@ def seed_everything(seed: int = 42) -> None:
     torch.backends.cudnn.benchmark = False
 
 
+def resolve_path(path_value: str, base_dir: Path) -> str:
+    """Resolve a config path relative to the config file directory."""
+    path = Path(path_value).expanduser()
+    if not path.is_absolute():
+        path = (base_dir / path).resolve()
+    return str(path)
+
+
 def load_config(path: str = "config.yaml") -> dict:
-    """Load YAML configuration file."""
-    with open(path, "r") as f:
-        return yaml.safe_load(f)
+    """Load YAML configuration file and normalize relative filesystem paths."""
+    config_path = Path(path).expanduser()
+    if not config_path.is_absolute():
+        cwd_candidate = config_path.resolve()
+        if cwd_candidate.exists():
+            config_path = cwd_candidate
+        else:
+            config_path = (Path(__file__).resolve().parent / config_path).resolve()
+
+    if not config_path.exists():
+        raise FileNotFoundError(f"Config file not found: {config_path}")
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+
+    base_dir = config_path.parent
+    for section, keys in {
+        "data": ["data_dir", "train_dir", "val_dir", "test_dir"],
+        "output": [
+            "checkpoint_dir",
+            "results_dir",
+            "log_dir",
+            "final_results_csv",
+            "performance_csv",
+        ],
+    }.items():
+        for key in keys:
+            if key in cfg.get(section, {}):
+                cfg[section][key] = resolve_path(cfg[section][key], base_dir)
+
+    cfg.setdefault("meta", {})["config_path"] = str(config_path)
+    return cfg
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -284,6 +321,14 @@ def build_dataloaders(cfg: dict) -> dict:
                     'train_ds', 'val_ds', 'test_ds'
     """
     seed_everything(cfg["training"]["seed"])
+
+    for split_name in ["train_dir", "val_dir", "test_dir"]:
+        split_path = Path(cfg["data"][split_name])
+        if not split_path.exists():
+            raise FileNotFoundError(
+                f"Configured {split_name} does not exist: {split_path}. "
+                f"Check {cfg.get('meta', {}).get('config_path', 'config.yaml')}."
+            )
 
     train_ds = FractureDataset(cfg["data"]["train_dir"], build_train_transforms(cfg))
     val_ds   = FractureDataset(cfg["data"]["val_dir"],   build_val_transforms(cfg))

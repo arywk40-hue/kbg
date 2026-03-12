@@ -431,7 +431,7 @@ def main(cfg: dict):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="config.yaml")
+    parser.add_argument("--config", default=str(Path(__file__).with_name("config.yaml")))
     args = parser.parse_args()
     cfg = load_config(args.config)
     main(cfg)

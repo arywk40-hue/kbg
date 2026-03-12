@@ -97,14 +97,17 @@ def train_one_epoch(
         images = images.to(device, non_blocking=True)
 
         # Handle MixUp labels
-        is_mixup = isinstance(labels, tuple)
+        is_mixup = isinstance(labels, (tuple, list)) and len(labels) == 3
         if is_mixup:
             labels_a, labels_b, lam = labels
             labels_a = labels_a.to(device)
             labels_b = labels_b.to(device)
             mixed_labels = (labels_a, labels_b, lam)
         else:
-            labels = labels.to(device)
+            if isinstance(labels, (list, tuple)):
+                labels = torch.as_tensor(labels, device=device)
+            else:
+                labels = labels.to(device)
 
         # Only CUDA supports torch.amp autocast; fallback to no-op elsewhere.
         amp_ctx = autocast(device_type="cuda", enabled=use_amp) if use_amp else nullcontext()
@@ -368,7 +371,7 @@ def run_cross_validation(cfg: dict):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train bone fracture classifier")
-    parser.add_argument("--config", default="config.yaml")
+    parser.add_argument("--config", default=str(Path(__file__).with_name("config.yaml")))
     parser.add_argument("--cv", action="store_true", help="Run 5-fold cross-validation")
     args = parser.parse_args()
 
