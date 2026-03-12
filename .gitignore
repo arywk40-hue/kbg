@@ -1,26 +1,23 @@
-# ── Model checkpoints (too large for GitHub) ──
-checkpoints/*.pth
-checkpoints/*.pt
-
-# ── Python ──
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
-*.egg-info/
-dist/
-build/
-*.egg
+*.pyc
+*.pyo
+*.pyd
 
-# ── OS ──
-.DS_Store
-Thumbs.db
+# Virtual environment
+env/
+venv/
+.venv/
 
-# ── IDE ──
+# Model checkpoints and large files
+/checkpoints/
+/data/
+
+# Generated results, logs, and plots
+/results/
+/logs/
+
+# IDE and editor configuration
 .vscode/
 .idea/
-
-# ── Data (not part of the repo) ──
-data/
-
-# ── Misc ──
-*.log
-*.csv.bak
+*.swp
